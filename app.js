@@ -25,7 +25,14 @@ app.get('/canciones', async (req, res) => {
   await client.end();
   console.log(result.rows);
   res.send(result.rows)
+})
 
+app.post('/crearusuario', async (req, res) => {
+  const client = new Client(config);
+  await client.connect();
+  let result = await client.query("insert into usuario (id, nombre, password) values ($1, $2, $3) Returning *");
+  await client.end();
+  res.send(result.rows)
 })
 
 app.listen(PORT, () => {
