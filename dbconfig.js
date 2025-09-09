@@ -1,17 +1,21 @@
-// export POSTGRES_HOST=ep-blue-feather-a4ve7rp2.us-east-1.aws.neon 
-// export POSTGRES_USER=default
-// export POSTGRES_PASSWORD=xxxxx
-// 
+    export const PGHOST="ep-dry-hill-ac0grk5v-pooler.sa-east-1.aws.neon.tech"
+    export const PGUSER="neondb_owner"
+    export const PGPASSWORD="npg_IFHtBqUfn1C9"
+    export const PGDATABASE="neondb"
 
 
-export const config = {
-    host :process.env.PGHOST,
-    database:process.env.PGDATABASE,
-    user:process.env.PGUSER,
-    password:process.env.PGPASSWORD,
-    port:5432,
-    ssl: true
-}
+    export const config = {
+        host: process.env.PGHOST,
+        database: process.env.PGDATABASE,
+        user: process.env.PGUSER,
+        password: process.env.PGPASSWORD,
+        port: process.env.PGPORT || 5432,
+        ssl: {
+          rejectUnauthorized: false
+        }
+      };
+      
+    
 
 
- 
+    
