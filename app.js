@@ -123,6 +123,6 @@ app.get('/escucho', authMiddleware, async (req, res) => {
 
 app.get('/', (req, res) => res.send('API Auth — OK'));
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
