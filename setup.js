@@ -15,7 +15,8 @@ async function setupDB() {
       CREATE TABLE IF NOT EXISTS Usuario (
         userid TEXT PRIMARY KEY,
         nombre TEXT NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        rol TEXT DEFAULT 'Usuario'
       );
     `;
 
