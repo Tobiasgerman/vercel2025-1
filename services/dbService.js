@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 // services/dbService.js
 import pkg from 'pg';
 import { config } from '../dbconfig.js';
