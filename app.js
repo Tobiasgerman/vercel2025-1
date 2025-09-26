@@ -37,11 +37,12 @@ function authMiddleware(req, res, next) {
 
 /*
   POST /crearusuario
-  recibe JSON: { userid, nombre, password }
+  recibe JSON: { userid, nombre, password, rol }
   crea usuario con password hasheado
 */
 app.post('/crearusuario', async (req, res) => {
-  const { userid, nombre, password } = req.body;
+  const body = req.body || {};
+  const { userid, nombre, password, rol } = req.body;
   if (!userid || !nombre || !password) {
     return res.status(400).json({ error: "Faltan campos: userid, nombre y password son requeridos" });
   }
@@ -50,8 +51,8 @@ app.post('/crearusuario', async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const client = new Client(config);
     await client.connect();
-    const query = `INSERT INTO Usuario (userid, nombre, password) VALUES ($1, $2, $3) RETURNING userid, nombre`;
-    const vals = [userid, nombre, hashed];
+    const query = `INSERT INTO usuario (userid, nombre, password, rol) VALUES ($1, $2, $3, $4) RETURNING userid, nombre, rol`;
+    const vals = [userid, nombre, hashed, rol || 'Usuario'];
     const result = await client.query(query, vals);
     await client.end();
     return res.status(201).json({ usuario: result.rows[0] });
@@ -68,13 +69,14 @@ app.post('/crearusuario', async (req, res) => {
   valida y devuelve { token }
 */
 app.post('/login', async (req, res) => {
+  const body = req.body || {};
   const { userid, password } = req.body;
   if (!userid || !password) return res.status(400).json({ error: "Faltan campos: userid y password" });
 
   const client = new Client(config);
   try {
     await client.connect();
-    const q = "SELECT userid, nombre, password FROM Usuario WHERE userid = $1";
+    const q = "SELECT userid, nombre, password, rol FROM usuario WHERE userid = $1";
     const r = await client.query(q, [userid]);
     await client.end();
 
@@ -84,7 +86,7 @@ app.post('/login', async (req, res) => {
     const passOK = await bcrypt.compare(password, dbUser.password);
     if (!passOK) return res.status(401).json({ error: "Password inválido" });
 
-    const payload = { userid: dbUser.userid, nombre: dbUser.nombre };
+    const payload = { userid: dbUser.userid, nombre: dbUser.nombre, rol: dbUser.rol };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '2h' });
 
     return res.json({ token });
@@ -107,14 +109,42 @@ app.get('/escucho', authMiddleware, async (req, res) => {
     await client.connect();
     const q = `
       SELECT c.id, c.nombre, COALESCE(e.reproducciones,0) AS reproducciones
-      FROM Canciones c
-      JOIN Escucha e ON e.cancionid = c.id
+      FROM canciones c
+      JOIN escucha e ON e.cancionid = c.id
       WHERE e.usuarioid = $1
       ORDER BY e.reproducciones DESC
     `;
     const r = await client.query(q, [userid]);
     await client.end();
+    if (r.rows.length === 0) {
+      return res.json({ message: "Todavía no escuchaste ninguna canción" });
+    }
     return res.json({ canciones: r.rows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/*
+  POST /cancion
+  crea canción, solo admin
+*/
+app.post('/cancion', authMiddleware, (req, res, next) => {
+  if (!req.user.rol || req.user.rol !== 'Admin') {
+    return res.status(403).json({ error: "Requiere rol Admin" });
+  }
+  next();
+}, async (req, res) => {
+  const { nombre } = req.body;
+  if (!nombre) return res.status(400).json({ error: "Falta nombre" });
+  const client = new Client(config);
+  try {
+    await client.connect();
+    const q = "INSERT INTO canciones(nombre) VALUES($1) RETURNING id, nombre";
+    const r = await client.query(q, [nombre]);
+    await client.end();
+    return res.status(201).json({ cancion: r.rows[0] });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message });

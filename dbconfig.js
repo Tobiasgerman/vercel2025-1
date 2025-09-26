@@ -1,6 +1,6 @@
-    export const PGHOST="ep-dry-hill-ac0grk5v-pooler.sa-east-1.aws.neon.tech"
+    export const PGHOST="ep-noisy-violet-adntz7hq-pooler.c-2.us-east-1.aws.neon.tech"
     export const PGUSER="neondb_owner"
-    export const PGPASSWORD="npg_IFHtBqUfn1C9"
+    export const PGPASSWORD="npg_ceWf0YDSg2ar"
     export const PGDATABASE="neondb"
 
 
