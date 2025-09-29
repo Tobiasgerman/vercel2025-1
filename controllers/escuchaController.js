@@ -9,6 +9,11 @@ export async function registrarEscucha(req, res) {
   const userid = req.user?.userid;
   if (!userid) return res.status(401).json({ error: "No autenticado" });
   try {
+    // Verificar que la canción existe en la base de datos
+    const songCheck = "SELECT id FROM canciones WHERE id = $1";
+    const songRes = await db.query(songCheck, [cancionId]);
+    if (songRes.rowCount === 0) return res.status(404).json({ error: "Canción no encontrada" });
+
     // Si ya existe registro para usuario+cancion, incrementamos reproducciones
     const checkQ = "SELECT id, reproducciones FROM escucha WHERE usuarioid=$1 AND cancionid=$2";
     const r = await db.query(checkQ, [userid, cancionId]);

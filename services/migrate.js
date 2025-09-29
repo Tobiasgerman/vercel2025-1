@@ -35,7 +35,10 @@ const migrationSQL = async () => {
 
   // 3. crear un usuario admin de ejemplo
   const adminPassword = 'admin123';
-  const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+  if (typeof adminPassword !== 'string') {
+    throw new Error('Admin password must be a string');
+  }
+  const hashedAdminPassword = await bcrypt.hash(adminPassword.toString(), 10);
   await db.query(`
     INSERT INTO usuario (userid, nombre, password, rol)
     VALUES ('admin01', 'Admin Demo', $1, 'Admin')

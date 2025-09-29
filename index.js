@@ -1,6 +1,7 @@
 // index.js
 import express from 'express';
 import 'dotenv/config';
+import './services/migrate.js'; // run migrations on startup
 import authRoutes from './routes/auth.js';
 import cancionRoutes from './routes/cancion.js';
 import escuchaRoutes from './routes/escucha.js';
